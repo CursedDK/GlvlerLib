@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>5a77dca3-d335-4f01-9d49-a8efbc68f715</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitLabApiClient" Version="1.8.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageReference Include="Octokit" Version="14.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Config\" />
+  </ItemGroup>
+
+</Project>
