@@ -1,4 +1,5 @@
-﻿using GitLabApiClient;
+﻿using System.Reflection;
+using GitLabApiClient;
 using Microsoft.Extensions.Configuration;
 using Octokit;
 
@@ -8,24 +9,26 @@ namespace GLvler
     {
         public static IConfiguration LoadConfig()
         {
+            var projectRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"..\..\.."));
+            var configPath = Path.Combine(projectRoot, "config");
             return new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory() + "/config")
+                .SetBasePath(configPath)
                 .AddJsonFile("config.json", optional: false, reloadOnChange: true)
                 .Build();
         }
 
-        public static async Task ShowCounter(string source, string gitlabHostUrl = "")
+        public static async Task<Dictionary<string, int>> ShowCounterAsync(string source, string gitlabHostUrl = "")
         {
             var config = LoadConfig();
             if (source.Equals("github", StringComparison.OrdinalIgnoreCase))
-                await UseGithub(config["GithubToken"]);
+                return await UseGithubAsync(config["GithubToken"]);
             else if (source.Equals("gitlab", StringComparison.OrdinalIgnoreCase))
-                await UseGitLab(config["GitLabToken"], string.IsNullOrEmpty(gitlabHostUrl) ? config["GitLabUrl"] : gitlabHostUrl);
+                return await UseGitLabAsync(config["GitLabToken"], string.IsNullOrEmpty(gitlabHostUrl) ? config["GitLabUrl"] : gitlabHostUrl);
             else
                 throw new Exception("Unknown source specified.");
         }
 
-        public static async Task UseGithub(string token)
+        public static async Task<Dictionary<string, int>> UseGithubAsync(string token)
         {
             var client = new GitHubClient(new ProductHeaderValue("CommitCounter"))
             {
@@ -47,15 +50,10 @@ namespace GLvler
                     totals[login] = totals.GetValueOrDefault(login, 0) + commits;
                 }
             }
-
-            // The code to display the totals is commented out
-            //foreach (var user in totals.OrderByDescending(kv => kv.Value))
-            //{
-            //    Console.WriteLine($"{user.Key}: {user.Value} commits");
-            //}
+            return totals;
         }
 
-        public static async Task UseGitLab(string token, string gitlabHostUrl)
+        public static async Task<Dictionary<string, int>> UseGitLabAsync(string token, string gitlabHostUrl)
         {
             if (string.IsNullOrEmpty(token))
                 throw new Exception("GitLab token is missing.");
@@ -80,11 +78,7 @@ namespace GLvler
                 }
             }
 
-            // The code to display the commit totals is commented out
-            //foreach (var kv in commitTotals.OrderByDescending(x => x.Value))
-            //{
-            //    Console.WriteLine($"{kv.Key}: {kv.Value} commits");
-            //}
+            return commitTotals;
         }
     }
 }
